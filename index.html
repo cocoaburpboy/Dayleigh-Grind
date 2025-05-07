@@ -1,0 +1,286 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dayleigh Grind LLC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'RoxboroughCF';
+            src: url('https://example.com/path-to-roxboroughcf.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: #1c2526; /* Metallic black */
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #6fb4a6;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'RoxboroughCF', serif;
+            font-size: 2em;
+            color: #1c2526; /* Metallic black lettering */
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul li {
+            margin-left: 30px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #1c2526; /* Metallic black lettering */
+            font-weight: 700;
+        }
+
+        nav ul li .estimate-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        nav ul li .estimate-button:hover {
+            background-color: #555;
+        }
+
+        section {
+            padding: 80px 0;
+            background-color: #e4dbd5;
+            margin-top: 60px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            text-align: center;
+        }
+
+        .gallery {
+            display: flex;
+            justify-content: center;
+            gap: 30px; /* Gaps between photos */
+            padding: 20px;
+        }
+
+        .gallery img {
+            width: 300px; /* Fixed width for consistency */
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjusted for two blocks */
+            gap: 20px;
+            padding: 20px;
+            max-width: 800px; /* Center and constrain width for two blocks */
+            margin: 0 auto;
+        }
+
+        .service-item {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .cta-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 700;
+        }
+
+        .social-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .social-links a:hover {
+            text-decoration: underline;
+        }
+
+        .service-area {
+            text-align: center;
+            font-size: 0.9em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            background-color: #1c2526; /* Metallic black */
+            color: #fff; /* White lettering */
+            padding: 20px;
+            text-align: center;
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Dayleigh Grind LLC</div>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#estimate" class="estimate-button">Get Estimate</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="about">
+        <div class="container">
+            <h1>About Us</h1>
+            <p>Dayleigh Grind LLC is not your average construction company. We rely on quality, honesty, and integrity to take your project from good to amazing! Whether you want a full remodel, a brand new house, or just a few switches fixed we do it all.</p>
+        </div>
+    </section>
+
+    <section id="gallery">
+        <div class="container">
+            <h2>Our Work</h2>
+            <div class="gallery">
+                <img src="https://live.staticflickr.com/65535/54503812434_53fe27152f_b.jpg" alt="Project 1">
+                <img src="https://live.staticflickr.com/65535/54503893648_d0678db13e_b.jpg" alt="Project 2">
+                <img src="https://live.staticflickr.com/65535/54503812984_43acb26f77_c.jpg" alt="Project 3">
+            </div>
+        </div>
+    </section>
+
+    <section id="services">
+        <div class="container">
+            <h2>Our Services</h2>
+            <div class="services-grid">
+                <div class="service-item">
+                    <h3>Small & Medium Projects</h3>
+                    <p>From light fixtures to kitchen cabinets to deck remodels we've got you covered!</p>
+                </div>
+                <div class="service-item">
+                    <h3>Large Projects</h3>
+                    <p>In need of a brand new deck, perhaps even a whole new wing to your home? Perfect! We do everything small to large!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="estimate">
+        <div class="container">
+            <h2>Get an Estimate</h2>
+            <div class="service-area">Serving the greater Kalispell area.</div>
+            <p>Contact us today to discuss your project and get a free estimate. Let’s bring your vision to life!</p>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfwEm4jDyUzXQJLUgsjywB7C8X5NASjk_BTV0e1Se16zgOKaw/viewform?usp=header" class="cta-button">Get Estimate</a>
+            <div class="social-links">
+                <a href="https://www.facebook.com/share/19DEGPWbED/?mibextid=wwXIfr" target="_blank">Facebook</a>
+                <a href="https://www.instagram.com/dayleigh_grind_llc?igsh=aXAwcm5zYjR0dmJn&utm_source=qr" target="_blank">Instagram</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 Dayleigh Grind LLC. All rights reserved.</p>
+        <p>Phone: (530) 768-9555</p>
+        <p>Email: dayleighgrindllc@gmail.com</p>
+    </footer>
+</body>
+</html>
